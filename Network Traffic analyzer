@@ -1,0 +1,25 @@
+# Import necessary modules from Scapy
+from scapy.all import sniff, IP, TCP, UDP
+
+# Initialize protocol
+protocol_counts = {"HTTP": 0, "HTTPS": 0, "DNS": 0}
+
+# Define a packet processing function
+def process_packet(packet):
+    if IP in packet:
+        if TCP in packet:
+            if packet[TCP].dport == 80 or packet[TCP].sport == 80:
+                protocol_counts["HTTP"] += 1
+            elif packet[TCP].dport == 443 or packet[TCP].sport == 443:
+                protocol_counts["HTTPS"] += 1
+        elif UDP in packet:
+            if packet[UDP].sport == 53 or packet[UDP].dport == 53:
+                protocol_counts["DNS"] += 1
+
+# Capture 100 packets and process them with the process_packet function
+packets = sniff(count=100, prn=process_packet)
+
+# Print summary of protocol counts
+print("Protocol Summary:")
+for protocol, count in protocol_counts.items():
+    print(f"{protocol}: {count} packets")
